@@ -1,0 +1,8 @@
+prefix=/home/nivanpc/RSSGroupProject/catkin_ws/install
+
+Name: rssproject
+Description: Description of rssproject
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

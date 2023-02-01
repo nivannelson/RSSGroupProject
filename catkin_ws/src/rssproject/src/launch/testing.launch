@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!--<include file="$(find rosbot_bringup)/launch/rosbot_rviz.launch"></include> -->
+    <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:/home/user/simulation_ws/src/search_and_rescue/textures" />
+    <!--<include file="$(find rosbot_bringup)/launch/rosbot.launch">-->
+    <include file="$(find rssproject)/src/launch/bot_load.launch"> 
+    </include>
+    <include file="$(find rosbot_gazebo)/launch/rosbot_world.launch">
+        <arg name="gui" value="true"/>
+        <arg name="world" value="$(find search_and_rescue)/world/test.world"/>
+    </include>
+    
+
+
+    <param name="robot_description" command="$(find xacro)/xacro '$(find rosbot_description)/urdf/rosbot.xacro'"/>
+
+
+
+    <!-- Show in Rviz   -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosbot_description)/rviz/rosbot.rviz" required="true" output="screen"/>
+
+
+    <include file="$(find rssproject)/src/launch/gmapping.launch"></include>
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find rssproject)/src/config/navigation/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find rssproject)/src/config/navigation/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find rssproject)/src/config/navigation/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rssproject)/src/config/navigation/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rssproject)/src/config/navigation/trajectory_planner.yaml" command="load" />
+
+        <remap from="cmd_vel" to="cmd_vel"/>
+        <remap from="odom" to="odom"/>
+        <remap from="scan" to="/scan"/>
+        <param name="move_base/DWAPlannerROS/yaw_goal_tolerance" value="5.0"/>
+        <param name="move_base/DWAPlannerROS/xy_goal_tolerance" value="5.0"/>
+
+    </node>
+    
+	<arg name="object_prefix" default="object"/>
+	<arg name="objects_path"  default="$(find rssproject)/src/objects/"/>
+	<arg name="gui"           default="false"/>
+	<arg name="approx_sync"   default="true"/>
+	<arg name="pnp"           default="true"/>
+	<arg name="tf_example"    default="true"/>
+	<arg name="settings_path" default="~/.ros/find_object_2d.ini"/>
+	
+	<arg name="rgb_topic"         default="/camera/rgb/image_raw"/>
+	<arg name="depth_topic"       default="/camera/depth/image_raw"/>
+	<arg name="camera_info_topic" default="/camera/rgb/camera_info"/>
+	
+   
+	<node name="find_object_3d" pkg="find_object_2d" type="find_object_2d">
+		<param name="gui" value="$(arg gui)" type="bool"/>
+		<param name="settings_path" value="$(arg settings_path)" type="str"/>
+		<param name="subscribe_depth" value="true" type="bool"/>
+		<param name="objects_path" value="$(arg objects_path)" type="str"/>
+		<param name="object_prefix" value="$(arg object_prefix)" type="str"/>
+		<param name="approx_sync" value="$(arg approx_sync)" type="bool"/>
+		<param name="pnp" value="$(arg pnp)" type="bool"/>
+		
+		<remap from="rgb/image_rect_color" to="$(arg rgb_topic)"/>
+		<remap from="depth_registered/image_raw" to="$(arg depth_topic)"/>
+		<remap from="depth_registered/camera_info" to="$(arg camera_info_topic)"/>
+	</node>
+    <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+        <param name="robot_base_frame" value="base_link"/>
+        <param name="costmap_topic" value="map"/>
+        <param name="costmap_updates_topic" value="map_updates"/>
+        <param name="visualize" value="true"/>
+        <param name="planner_frequency" value="0.33"/>
+        <param name="progress_timeout" value="10.0"/>
+        <param name="potential_scale" value="1e-3"/>
+        <param name="orientation_scale" value="0.0"/>
+        <param name="gain_scale" value="1.0"/>
+        <param name="transform_tolerance" value="0.6"/>
+        <param name="min_frontier_size" value="0.55"/>
+    </node>
+</launch>

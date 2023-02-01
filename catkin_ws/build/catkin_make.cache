@@ -1,0 +1,2 @@
+m-explore/explore:m-explore/map_merge:rosbot_ros/src/navigation_testing:rosbot_ros/src/rosbot_bringup:rosbot_ros/src/rosbot_description:rosbot_ros/src/rosbot_gazebo:rosbot_ros/src/rosbot_navigation:rssproject
+-DCATKIN_DEVEL_PREFIX=/home/nivanpc/RSSGroupProject/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/nivanpc/RSSGroupProject/catkin_ws/install -G Unix Makefiles
